@@ -123,8 +123,14 @@ dim(mydata)
 write.table(mydata,"mydata.txt",row.name=FALSE)
 
 #create codebook
+mydata<-within(mydata,{
+        description(subject)<-"30 people measured in the study"
+        description(activityname)<-"6 activities measured in study"
+        
+        }
+)
 cboutput<-codebook(data.set(mydata))
-capture.output(cboutput,file="cb.txt")
+capture.output(cboutput,file="codebook.Rmd")
 
 ### End Here. #############################################################
 
