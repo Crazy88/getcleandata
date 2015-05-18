@@ -1,0 +1,149 @@
+#Getting & Cleaning Data Course Project
+May 2015
+
+###Overview
+From course assignment page:
+<https://class.coursera.org/getdata-014/human_grading/view/courses/973501/assessments/3/submissions>
+
+You should create one R script called run_analysis.R that does the following:
+
+* Merges the training and the test sets to create one data set.
+* Extracts only the measurements on the mean and standard deviation for each measurement. 
+* Uses descriptive activity names to name the activities in the data set
+* Appropriately labels the data set with descriptive variable names. 
+* From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+###Source Data
+Source
+<https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip>
+
+Additional information
+<http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones>
+
+Data Sets Used:
+X_train.txt, Y_train.txt, subject_train.txt, 
+X_test.txt, Y_test.txt, subject_test.txt, 
+activity_labels.txt, features.txt
+
+Data Set Overview:
+"test" or "train" indicates whether the data are for  the test group or the training group
+"x" indicates the measurements
+"y" indicates the activity code
+"subject" indicates the people being measured
+"activity_labels" file - relates the six activity codes to the six
+"features " file- names for each measurement column in x
+
+###Process
+
+Note: Source code is fully commented but I removed comments for the summary below
+
+####Merges the training and the test sets to create one data set.
+Read the files into R data sets
+
+```
+xtrain<-read.table("X_train.txt")
+ytrain<-read.table("Y_train.txt")
+strain<-read.table("subject_train.txt")
+
+xtest<-read.table("X_test.txt")
+ytest<-read.table("Y_test.txt")
+stest<-read.table("subject_test.txt")
+```
+
+Combine the data:
+Stack (rbind) test and train data by data type: x, y or s
+Add column names to the stacked datasets
+Combine (cbind) the stacked datasets into one dataset
+Add the activity names
+
+```
+strain$group<-"train"
+stest$group<-"test"
+
+alls<-rbind(strain,stest)
+ally<-rbind(ytrain,ytest)
+allx<-rbind(xtrain,xtest)
+
+names(alls)<-c("subject","group")
+setnames(ally,"activitycode")
+names(allx)<-tolower(features[,2])
+
+alls=alls %>% select(group,subject)
+
+combo<-cbind(alls,ally,allx)
+colnames(combo)
+```
+
+####Extracts only the measurements on the mean and standard deviation for each measurement. 
+
+Identify columns to keep:
+Subject and activity, measurements of means ("mean")  or standard deviations ("std")
+Add the activity names
+
+```
+cols<-grep("subject|group|activitycode|mean|std",colnames(combo))
+cols
+
+combokeep<-combo[,cols]
+dim(combokeep)
+
+names(activity)<-c("activitycode","activityname")
+activity
+
+combowithactivity<-merge(activity,combokeep)
+dim(combowithactivity)
+```
+
+####Uses descriptive activity names to name the activities in the data set
+####Appropriately labels the data set with descriptive variable names. 
+
+Make the data tidy:
+Drop redundant activity code column (1:1 with activity name)
+Make the columns more readable by expanding the shortened name components and dropping special characters
+
+```
+names(combowithactivity)<-gsub("^t","time",names(combowithactivity))
+names(combowithactivity)<-gsub("mag","magnitude",names(combowithactivity))
+names(combowithactivity)<-gsub("^f","freq",names(combowithactivity))
+names(combowithactivity)<-gsub("acc","acceleration",names(combowithactivity))
+names(combowithactivity)<-gsub("gyro","gyroscope",names(combowithactivity))
+names(combowithactivity)<-gsub("-","",names(combowithactivity))
+names(combowithactivity)<-gsub("\\(","",names(combowithactivity))
+names(combowithactivity)<-gsub("\\)","",names(combowithactivity))
+names(combowithactivity)<-gsub("\\,","",names(combowithactivity))
+
+combowithactivity<-arrange(combowithactivity,group,subject,activityname)
+```
+
+####From the data set in step 4, creates a second, independent tidy data set 
+####with the average of each variable for each activity and each subject.
+
+Create the tidy summary dataset:
+Calculate means for all mean and standard deviation measurement for each unique user and activity combination
+
+```
+DT <- data.table(combowithactivity)
+DT$group<-NULL
+mydata<-aggregate(.~subject+activityname,DT,mean)
+mydata<-arrange(mydata,subject,activityname)
+dim(mydata)
+
+write.table(mydata,"C:mydata.txt",row.name=FALSE)
+```
+
+Create the codebook
+
+```
+cboutput<-codebook(data.set(mydata))
+capture.output(cboutput,file="cb.txt")
+```
+
+Final data set is "wide tidy" per the discussion forum:
+<https://class.coursera.org/getdata-014/forum/thread?thread_id=31>
+
+Per Hadley's tidy data article (page four), data are tidy:
+* Each variable forms a column (subject, activity, measurements)
+* Each observation forms a row (unique subject and activity combinations)
+* Each type of observational unit forms a table (means of normalized measurements)
+<http://vita.had.co.nz/papers/tidy-data.pdf>
+
