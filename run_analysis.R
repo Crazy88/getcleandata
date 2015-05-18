@@ -40,9 +40,6 @@ names(alls)<-c("subject","group")
 setnames(ally,"activitycode")
 names(allx)<-tolower(features[,2])
 
-# TIDY: reorder alls columns: testtrain first
-alls=alls %>% select(group,subject)
-
 # merge subjects, activity codes and measurements
 combo<-cbind(alls,ally,allx)
 colnames(combo)
