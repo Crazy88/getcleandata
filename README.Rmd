@@ -102,6 +102,8 @@ Drop redundant activity code column (1:1 with activity name)
 Make the columns more readable by expanding the shortened name components and dropping special characters
 
 ```
+combowithactivity$activitycode<-NULL
+
 names(combowithactivity)<-gsub("^t","time",names(combowithactivity))
 names(combowithactivity)<-gsub("mag","magnitude",names(combowithactivity))
 names(combowithactivity)<-gsub("^f","freq",names(combowithactivity))
