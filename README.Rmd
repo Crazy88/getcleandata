@@ -81,10 +81,10 @@ features<-read.table("features.txt",head=FALSE)
 ```
 
 Combine the data:
-Stack (rbind) test and train data by data type: x, y or s
-Add column names to the stacked datasets
-Combine (cbind) the stacked datasets into one dataset
-Add the activity names
+* Stack (rbind) test and train data by data type: x, y or s
+* Add column names to the stacked datasets
+* Combine (cbind) the stacked datasets into one dataset
+* Add the activity names
 
 ```
 ### 1. Merges the training and the test sets to create one data set.
@@ -110,9 +110,9 @@ colnames(combo)
 
 ####Extracts only the measurements on the mean and standard deviation for each measurement. 
 
-Identify columns to keep:
-Subject and activity, measurements of means ("mean")  or standard deviations ("std")
-Add the activity names
+* Identify columns to keep:
+* Subject and activity, measurements of means ("mean") or standard deviations ("std")
+* Add the activity names
 
 ```
 ### 2. Extracts only the measurements on the mean and standard deviation for each measurement. 
@@ -129,6 +129,7 @@ dim(combokeep)
 ```
 
 ####Uses descriptive activity names to name the activities in the data set
+Add activity name, drop activity code
 
 ```
 ### 3. Uses descriptive activity names to name the activities in the data set
