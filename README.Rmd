@@ -143,7 +143,6 @@ activity
 
 combowithactivity<-merge(activity,combokeep)
 dim(combowithactivity)
-# [1] 10299    90 - verified merge
 
 # TIDY: drop activitycode (redundant with activity name)
 # note: in practice i'd probably keep it, easier to remerge later if needed
