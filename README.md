@@ -1,2 +1,0 @@
-# getcleandata
-Course project
