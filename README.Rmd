@@ -198,6 +198,9 @@ NOTE: dropping "group" because the assignment doesn's say to create or keep, but
 important variable to have in the underlying detailed data
 
 ```
+### 5. From the data set in step 4, creates a second, independent tidy data set 
+### with the average of each variable for each activity and each subject.
+
 DT <- data.table(combowithactivity)
 DT$group<-NULL
 mydata<-aggregate(.~subject+activityname,DT,mean)
