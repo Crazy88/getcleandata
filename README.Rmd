@@ -68,8 +68,6 @@ names(alls)<-c("subject","group")
 setnames(ally,"activitycode")
 names(allx)<-tolower(features[,2])
 
-alls=alls %>% select(group,subject)
-
 combo<-cbind(alls,ally,allx)
 colnames(combo)
 ```
