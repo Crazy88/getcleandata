@@ -42,12 +42,12 @@ For each record in the dataset it is provided:
 - An identifier of the subject who carried out the experiment.
 
 #####Data Set Overview:
-"test" or "train" indicates whether the data are for  the test group or the training group
-"x" indicates the measurements
-"y" indicates the activity code
-"subject" indicates the people being measured
-"activity_labels" file - relates the six activity codes to the six
-"features " file- names for each measurement column in x
+* "test" or "train" indicates whether the data are for the test or the training group
+* "x" indicates the measurements
+* "y" indicates the activity code
+* "subject" indicates the people being measured
+* "activity_labels" file - relates the six activity codes to the six activities
+* "features " file- names for each measurement column in x
 
 ###Process
 
