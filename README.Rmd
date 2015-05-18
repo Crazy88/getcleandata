@@ -134,8 +134,15 @@ write.table(mydata,"mydata.txt",row.name=FALSE)
 Create the codebook
 
 ```
+mydata<-within(mydata,{
+        description(subject)<-"30 people measured in the study"
+        description(activityname)<-"6 activities measured in study"
+        
+        }
+)
 cboutput<-codebook(data.set(mydata))
-capture.output(cboutput,file="cb.txt")
+cboutput
+capture.output(cboutput,file="codebook.Rmd")
 ```
 
 Final data set is "wide tidy" per the discussion forum:
