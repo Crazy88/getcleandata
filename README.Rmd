@@ -35,8 +35,6 @@ Data Set Overview:
 
 ###Process
 
-Note: Source code is fully commented but I removed comments for the summary below
-
 ####Merges the training and the test sets to create one data set.
 Read the files into R data sets
 
@@ -139,7 +137,6 @@ dim(combowithactivity)
 ####Appropriately labels the data set with descriptive variable names. 
 
 Make the data tidy:
-Drop redundant activity code column (1:1 with activity name)
 Make the columns more readable by expanding the shortened name components and dropping special characters
 
 ```
@@ -164,7 +161,7 @@ names(combowithactivity)<-gsub("acc","acceleration",names(combowithactivity))
 # The angular velocity vector measured by the gyroscope..."
 names(combowithactivity)<-gsub("gyro","gyroscope",names(combowithactivity))
 
-# drop -() characters
+# drop -(), characters
 names(combowithactivity)<-gsub("-","",names(combowithactivity))
 names(combowithactivity)<-gsub("\\(","",names(combowithactivity))
 names(combowithactivity)<-gsub("\\)","",names(combowithactivity))
@@ -180,6 +177,8 @@ combowithactivity<-arrange(combowithactivity,group,subject,activityname)
 
 Create the tidy summary dataset:
 Calculate means for all mean and standard deviation measurement for each unique user and activity combination
+NOTE: dropping "group" because the assignment doesn's say to create or keep, but I think it's an 
+important variable to have in the underlying detailed data
 
 ```
 DT <- data.table(combowithactivity)
