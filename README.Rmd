@@ -141,7 +141,6 @@ mydata<-within(mydata,{
         }
 )
 cboutput<-codebook(data.set(mydata))
-cboutput
 capture.output(cboutput,file="codebook.Rmd")
 ```
 
