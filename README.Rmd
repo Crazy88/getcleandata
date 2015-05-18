@@ -41,6 +41,19 @@ Note: Source code is fully commented but I removed comments for the summary belo
 Read the files into R data sets
 
 ```
+getwd()
+library(data.table)
+library(stringr)
+library(dplyr)
+library(memisc)
+
+# download zip
+# NOTE: due to my firewall I had to download and unzip manually, so this block hasn't been tested
+url<-"https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+download.file(url,destfile="./Dataset.zip",method="curl")
+unzip(zipfile="./Dataset.zip",exdir=".")
+# END untested block
+
 xtrain<-read.table("X_train.txt")
 ytrain<-read.table("Y_train.txt")
 strain<-read.table("subject_train.txt")
@@ -48,6 +61,9 @@ strain<-read.table("subject_train.txt")
 xtest<-read.table("X_test.txt")
 ytest<-read.table("Y_test.txt")
 stest<-read.table("subject_test.txt")
+
+activity<-read.table("activity_labels.txt")
+features<-read.table("features.txt",head=FALSE)
 ```
 
 Combine the data:
@@ -57,17 +73,23 @@ Combine (cbind) the stacked datasets into one dataset
 Add the activity names
 
 ```
+### 1. Merges the training and the test sets to create one data set.
+
+# add test/train group column to subject datasets
 strain$group<-"train"
 stest$group<-"test"
 
+# merge: stack training and test data sets
 alls<-rbind(strain,stest)
 ally<-rbind(ytrain,ytest)
 allx<-rbind(xtrain,xtest)
 
+# name columns, TIDY: translate features to all lower case
 names(alls)<-c("subject","group")
 setnames(ally,"activitycode")
 names(allx)<-tolower(features[,2])
 
+# merge subjects, activity codes and measurements
 combo<-cbind(alls,ally,allx)
 colnames(combo)
 ```
@@ -79,20 +101,41 @@ Subject and activity, measurements of means ("mean")  or standard deviations ("s
 Add the activity names
 
 ```
+### 2. Extracts only the measurements on the mean and standard deviation for each measurement. 
+
+#identify columns to keep
+
 cols<-grep("subject|group|activitycode|mean|std",colnames(combo))
 cols
 
+#extract columns
+
 combokeep<-combo[,cols]
 dim(combokeep)
-
-names(activity)<-c("activitycode","activityname")
-activity
-
-combowithactivity<-merge(activity,combokeep)
-dim(combowithactivity)
 ```
 
 ####Uses descriptive activity names to name the activities in the data set
+
+```
+### 3. Uses descriptive activity names to name the activities in the data set
+
+# rename activity data set columns
+names(activity)<-c("activitycode","activityname")
+activity
+
+#add activity name to combokeep, default merges on common name: "activitycode"
+
+combowithactivity<-merge(activity,combokeep)
+dim(combowithactivity)
+# [1] 10299    90 - verified merge
+
+# TIDY: drop activitycode (redundant with activity name)
+# note: in practice i'd probably keep it, easier to remerge later if needed
+
+combowithactivity$activitycode<-NULL
+dim(combowithactivity)
+```
+
 ####Appropriately labels the data set with descriptive variable names. 
 
 Make the data tidy:
@@ -100,17 +143,34 @@ Drop redundant activity code column (1:1 with activity name)
 Make the columns more readable by expanding the shortened name components and dropping special characters
 
 ```
-combowithactivity$activitycode<-NULL
+### 4. Appropriately labels the data set with descriptive variable names. 
 
+## TIDY: clarify column names based on README details:
+
+# "(prefix 't' to denote time)..."
 names(combowithactivity)<-gsub("^t","time",names(combowithactivity))
+
+# "Also the magnitude of these three-dimensional signals were..."
 names(combowithactivity)<-gsub("mag","magnitude",names(combowithactivity))
+
+# "(Note the 'f' to indicate frequency domain signals)." 
 names(combowithactivity)<-gsub("^f","freq",names(combowithactivity))
+
+# "train/Inertial Signals/total_acc_x_train.txt': The acceleration signal..."
+# 'train/Inertial Signals/body_acc_x_train.txt': The body acceleration signal..." 
 names(combowithactivity)<-gsub("acc","acceleration",names(combowithactivity))
+
+# "train/Inertial Signals/body_gyro_x_train.txt': 
+# The angular velocity vector measured by the gyroscope..."
 names(combowithactivity)<-gsub("gyro","gyroscope",names(combowithactivity))
+
+# drop -() characters
 names(combowithactivity)<-gsub("-","",names(combowithactivity))
 names(combowithactivity)<-gsub("\\(","",names(combowithactivity))
 names(combowithactivity)<-gsub("\\)","",names(combowithactivity))
 names(combowithactivity)<-gsub("\\,","",names(combowithactivity))
+
+## TIDY: sort on group, subject, and activity
 
 combowithactivity<-arrange(combowithactivity,group,subject,activityname)
 ```
@@ -126,8 +186,10 @@ DT <- data.table(combowithactivity)
 DT$group<-NULL
 mydata<-aggregate(.~subject+activityname,DT,mean)
 mydata<-arrange(mydata,subject,activityname)
+
 dim(mydata)
 
+# write to text file for submission
 write.table(mydata,"mydata.txt",row.name=FALSE)
 ```
 
@@ -138,10 +200,11 @@ mydata<-within(mydata,{
         description(subject)<-"30 people measured in the study"
         description(activityname)<-"6 activities measured in study"
         
-        }
+}
 )
 cboutput<-codebook(data.set(mydata))
 capture.output(cboutput,file="codebook.Rmd")
+
 ```
 
 Final data set is "wide tidy" per the discussion forum:
